@@ -100,6 +100,8 @@
 .extern pxCriticalNesting
 /*-----------------------------------------------------------*/
 
+/*-----------------------------------------------------------*/
+
     .macro portcontexSAVE_FPU_CONTEXT
 addi sp, sp, -( portFPU_CONTEXT_SIZE )
 /* Store the FPU registers. */
@@ -182,6 +184,7 @@ addi sp, sp, ( portFPU_CONTEXT_SIZE )
 
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
+store_x x1, ( sp )
 store_x x1,  2  * portWORD_SIZE( sp )
 store_x x5,  3  * portWORD_SIZE( sp )
 store_x x6,  4  * portWORD_SIZE( sp )
@@ -280,6 +283,9 @@ load_x sp, 0 ( t1 )     /* Read sp from first TCB member. */
 load_x t0, 0 ( sp )
 csrw mepc, t0
 
+/* Load ra with the address of the instruction in the task to run next. TODO */
+load_x x1, 0 ( sp )
+
 /* Restore mstatus register. */
 load_x t0, 1 * portWORD_SIZE( sp )
 csrw mstatus, t0
@@ -302,7 +308,7 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
-load_x x1,  2  * portWORD_SIZE( sp )
+// load_x x1,  2  * portWORD_SIZE( sp )
 load_x x5,  3  * portWORD_SIZE( sp )
 load_x x6,  4  * portWORD_SIZE( sp )
 load_x x7,  5  * portWORD_SIZE( sp )
@@ -334,8 +340,15 @@ load_x x15, 13 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
 addi sp, sp, portCONTEXT_SIZE
 
-mret
+ret
    .endm
 /*-----------------------------------------------------------*/
+
+.global vPortYield
+vPortYield:
+    csrci mstatus, 8 # clear SPP
+    portcontextSAVE_CONTEXT_INTERNAL
+    jal vTaskSwitchContext
+    portcontextRESTORE_CONTEXT
 
 #endif /* PORTCONTEXT_H */
