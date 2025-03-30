@@ -184,7 +184,7 @@ addi sp, sp, ( portFPU_CONTEXT_SIZE )
 
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
-store_x x1, ( sp )
+// store_x x1, ( sp )
 store_x x1,  2  * portWORD_SIZE( sp )
 store_x x5,  3  * portWORD_SIZE( sp )
 store_x x6,  4  * portWORD_SIZE( sp )
@@ -283,6 +283,10 @@ load_x sp, 0 ( t1 )     /* Read sp from first TCB member. */
 load_x t0, 0 ( sp )
 csrw mepc, t0
 
+/* Set MPP to 3 to always jump into machine mode */
+li t0, 0x1800
+csrrs x0, mstatus, t0
+
 /* Load ra with the address of the instruction in the task to run next. TODO */
 load_x x1, 0 ( sp )
 
@@ -308,7 +312,6 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
-// load_x x1,  2  * portWORD_SIZE( sp )
 load_x x5,  3  * portWORD_SIZE( sp )
 load_x x6,  4  * portWORD_SIZE( sp )
 load_x x7,  5  * portWORD_SIZE( sp )
@@ -340,14 +343,17 @@ load_x x15, 13 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
 addi sp, sp, portCONTEXT_SIZE
 
-ret
+mret
    .endm
 /*-----------------------------------------------------------*/
 
 .global vPortYield
 vPortYield:
-    csrci mstatus, 8 # clear SPP
     portcontextSAVE_CONTEXT_INTERNAL
+
+    store_x ra, 0 ( sp )
+    load_x sp, xISRStackTop
+
     jal vTaskSwitchContext
     portcontextRESTORE_CONTEXT
 

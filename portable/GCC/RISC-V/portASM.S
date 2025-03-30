@@ -92,6 +92,7 @@ definitions. */
 .extern pullNextTime
 .extern uxTimerIncrementsForOneTick /* size_t type so 32-bit on 32-bit core and 64-bits on 64-bit core. */
 .extern xTaskReturnAddress
+.extern handle_trap
 
 .weak freertos_risc_v_application_exception_handler
 .weak freertos_risc_v_application_interrupt_handler
@@ -360,7 +361,7 @@ synchronous_exception:
     j handle_exception
 
 handle_interrupt:
-#if( portasmHAS_MTIME != 0 )
+#if portasmHAS_MTIME > 0
 
     test_if_mtimer:                     /* If there is a CLINT then the mtimer is used to generate the tick interrupt. */
         addi t0, x0, 1
@@ -373,7 +374,14 @@ handle_interrupt:
         beqz a0, processed_source       /* Don't switch context if incrementing tick didn't unblock a task. */
         call vTaskSwitchContext
         j processed_source
-
+#else
+    app_mtimer:
+        la t0, handle_trap
+        beq t0, x0, done
+        jalr t0
+        
+    done:
+        j processed_source
 #endif /* portasmHAS_MTIME */
 
 application_interrupt_handler:
