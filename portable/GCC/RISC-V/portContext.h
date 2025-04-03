@@ -184,7 +184,7 @@ addi sp, sp, ( portFPU_CONTEXT_SIZE )
 
    .macro portcontextSAVE_CONTEXT_INTERNAL
 addi sp, sp, -portCONTEXT_SIZE
-// store_x x1, ( sp )
+
 store_x x1,  2  * portWORD_SIZE( sp )
 store_x x5,  3  * portWORD_SIZE( sp )
 store_x x6,  4  * portWORD_SIZE( sp )
@@ -312,6 +312,7 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
+load_x x1,  2  * portWORD_SIZE( sp )
 load_x x5,  3  * portWORD_SIZE( sp )
 load_x x6,  4  * portWORD_SIZE( sp )
 load_x x7,  5  * portWORD_SIZE( sp )
