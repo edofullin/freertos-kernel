@@ -201,6 +201,9 @@ pxPortInitialiseStack:
     addi a0, a0, -portWORD_SIZE         /* Space for critical nesting count. */
     store_x x0, 0(a0)                   /* Critical nesting count starts at 0 for every task. */
 
+    addi a0, a0, -portWORD_SIZE
+    store_x x0, 0(a0)                   /* Space for mcycle */
+
 #ifdef __riscv_32e
     addi a0, a0, -(6 * portWORD_SIZE)   /* Space for registers x10-x15. */
 #else
@@ -288,6 +291,7 @@ xPortStartFirstTask:
 
     load_x  x5, 3 * portWORD_SIZE( sp )     /* Initial x5 (t0) value. */
     load_x  x6, 4 * portWORD_SIZE( sp )     /* Initial x6 (t1) value. */
+    csrw    mcycle, x0                      /* Reset mcycle for task. */
 
     addi    sp, sp, portCONTEXT_SIZE
     ret

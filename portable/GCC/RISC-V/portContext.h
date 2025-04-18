@@ -314,6 +314,9 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
+load_x t0, 30 * portWORD_SIZE( sp )
+csrw mcycle, t0
+
 load_x x1,  2  * portWORD_SIZE( sp )
 load_x x5,  3  * portWORD_SIZE( sp )
 load_x x6,  4  * portWORD_SIZE( sp )
@@ -344,8 +347,8 @@ load_x x15, 13 * portWORD_SIZE( sp )
     load_x x30, 28 * portWORD_SIZE( sp )
     load_x x31, 29 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
-load_x t0, 30 * portWORD_SIZE( sp )
-csrw mcycle, t0
+load_x x31, pxCurrentTCB
+load_x x31, 68(x31)
 
 addi sp, sp, portCONTEXT_SIZE
 
