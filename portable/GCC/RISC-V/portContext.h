@@ -215,8 +215,11 @@ store_x x15, 13 * portWORD_SIZE( sp )
     store_x x30, 28 * portWORD_SIZE( sp )
     store_x x31, 29 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
+
+#if configCONTEXT_LOCAL_MCYCLE == 1
 csrr t0, mcycle
 store_x t0, 30 * portWORD_SIZE( sp )
+#endif
 
 load_x t0, xCriticalNesting                                   /* Load the value of xCriticalNesting into t0. */
 store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the critical nesting value to the stack. */
@@ -314,8 +317,10 @@ load_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Obtain xCritical
 load_x t1, pxCriticalNesting                                 /* Load the address of xCriticalNesting into t1. */
 store_x t0, 0 ( t1 )                                         /* Restore the critical nesting value for this task. */
 
+#if configCONTEXT_LOCAL_MCYCLE == 1
 load_x t0, 30 * portWORD_SIZE( sp )
 csrw mcycle, t0
+#endif
 
 load_x x1,  2  * portWORD_SIZE( sp )
 load_x x5,  3  * portWORD_SIZE( sp )
@@ -347,8 +352,11 @@ load_x x15, 13 * portWORD_SIZE( sp )
     load_x x30, 28 * portWORD_SIZE( sp )
     load_x x31, 29 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
+
+#if traceCURRENT_TCB_X31 == 1
 load_x x31, pxCurrentTCB
 load_x x31, 68(x31)
+#endif
 
 addi sp, sp, portCONTEXT_SIZE
 
