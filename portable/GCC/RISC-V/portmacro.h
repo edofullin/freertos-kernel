@@ -91,7 +91,7 @@ typedef portUBASE_TYPE   TickType_t;
 
 /* Scheduler utilities. */
 extern void vTaskSwitchContext( void );
-#define portYIELD()                __asm volatile ( "ecall" );
+#define portYIELD()                __asm volatile ( "csrs sip, 0x2" );
 #define portEND_SWITCHING_ISR( xSwitchRequired ) \
     do                                           \
     {                                            \
@@ -111,8 +111,8 @@ extern void vTaskSwitchContext( void );
 /* Critical section management. */
 #define portCRITICAL_NESTING_IN_TCB    0
 
-#define portDISABLE_INTERRUPTS()                                   __asm volatile ( "csrc mstatus, 8" )
-#define portENABLE_INTERRUPTS()                                    __asm volatile ( "csrs mstatus, 8" )
+#define portDISABLE_INTERRUPTS()                                   __asm volatile ( "csrc sstatus, 2" )
+#define portENABLE_INTERRUPTS()                                    __asm volatile ( "csrs sstatus, 2" )
 
 extern size_t xCriticalNesting;
 #define portENTER_CRITICAL()      \

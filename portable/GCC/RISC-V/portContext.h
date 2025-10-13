@@ -229,7 +229,7 @@ store_x t0, portCRITICAL_NESTING_OFFSET * portWORD_SIZE( sp ) /* Store the criti
 
 portasmSAVE_ADDITIONAL_REGISTERS /* Defined in freertos_risc_v_chip_specific_extensions.h to save any registers unique to the RISC-V implementation. */
 
-csrr t0, mstatus
+csrr t0, sstatus
 store_x t0, 1 * portWORD_SIZE( sp )
 
 #if( configENABLE_FPU == 1 )
@@ -255,8 +255,8 @@ store_x sp, 0 ( t0 )             /* Write sp to first TCB member. */
 
    .macro portcontextSAVE_EXCEPTION_CONTEXT
 portcontextSAVE_CONTEXT_INTERNAL
-csrr a0, mcause
-csrr a1, mepc
+csrr a0, scause
+csrr a1, sepc
 addi a1, a1, 4          /* Synchronous so update exception return address to the instruction after the instruction that generated the exception. */
 store_x a1, 0 ( sp )    /* Save updated exception return address. */
 load_x sp, xISRStackTop /* Switch to ISR stack. */
@@ -265,8 +265,8 @@ load_x sp, xISRStackTop /* Switch to ISR stack. */
 
    .macro portcontextSAVE_INTERRUPT_CONTEXT
 portcontextSAVE_CONTEXT_INTERNAL
-csrr a0, mcause
-csrr a1, mepc
+csrr a0, scause
+csrr a1, sepc
 store_x a1, 0 ( sp )    /* Asynchronous interrupt so save unmodified exception return address. */
 load_x sp, xISRStackTop /* Switch to ISR stack. */
    .endm
@@ -276,13 +276,13 @@ load_x sp, xISRStackTop /* Switch to ISR stack. */
 load_x t1, pxCurrentTCB /* Load pxCurrentTCB. */
 load_x sp, 0 ( t1 )     /* Read sp from first TCB member. */
 
-/* Load mepc with the address of the instruction in the task to run next. */
+/* Load sepc with the address of the instruction in the task to run next. */
 load_x t0, 0 ( sp )
-csrw mepc, t0
+csrw sepc, t0
 
-/* Restore mstatus register. */
+/* Restore sstatus register. */
 load_x t0, 1 * portWORD_SIZE( sp )
-csrw mstatus, t0
+csrw sstatus, t0
 
 /* Defined in freertos_risc_v_chip_specific_extensions.h to restore any registers unique to the RISC-V implementation. */
 portasmRESTORE_ADDITIONAL_REGISTERS
@@ -333,7 +333,7 @@ load_x x15, 13 * portWORD_SIZE( sp )
     load_x x31, 29 * portWORD_SIZE( sp )
 #endif /* ifndef __riscv_32e */
 addi sp, sp, portCONTEXT_SIZE
-mret
+sret
    .endm
 /*-----------------------------------------------------------*/
 

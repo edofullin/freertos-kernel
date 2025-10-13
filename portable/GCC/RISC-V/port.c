@@ -132,9 +132,9 @@ size_t xTaskReturnAddress = ( size_t ) portTASK_RETURN_ADDRESS;
         uint32_t ulCurrentTimeHigh, ulCurrentTimeLow;
         volatile uint32_t * const pulTimeHigh = ( volatile uint32_t * const ) ( ( configMTIME_BASE_ADDRESS ) + 4UL ); /* 8-byte type so high 32-bit word is 4 bytes up. */
         volatile uint32_t * const pulTimeLow = ( volatile uint32_t * const ) ( configMTIME_BASE_ADDRESS );
-        volatile uint32_t ulHartId;
+        volatile uint32_t ulHartId = 0;
 
-        __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
+        // __asm volatile ( "csrr %0, mhartid" : "=r" ( ulHartId ) );
 
         pullMachineTimerCompareRegister = ( volatile uint64_t * ) ( ullMachineTimerCompareRegisterBase + ( ulHartId * sizeof( uint64_t ) ) );
 
@@ -186,7 +186,7 @@ BaseType_t xPortStartScheduler( void )
         /* Enable mtime and external interrupts.  1<<7 for timer interrupt,
          * 1<<11 for external interrupt.  _RB_ What happens here when mtime is
          * not present as with pulpino? */
-        __asm volatile ( "csrs mie, %0" ::"r" ( 0x880 ) );
+        __asm volatile ( "csrs sie, %0" ::"r" ( 0x220 ) );
     }
     #endif /* ( configMTIME_BASE_ADDRESS != 0 ) && ( configMTIMECMP_BASE_ADDRESS != 0 ) */
 
