@@ -210,7 +210,9 @@ store_x x15, 13 * portWORD_SIZE( sp )
     store_x x28, 26 * portWORD_SIZE( sp )
     store_x x29, 27 * portWORD_SIZE( sp )
     store_x x30, 28 * portWORD_SIZE( sp )
+#ifndef RTTEST
     store_x x31, 29 * portWORD_SIZE( sp )
+#endif
 #endif /* ifndef __riscv_32e */
 
 load_x t0, xCriticalNesting                                   /* Load the value of xCriticalNesting into t0. */
@@ -330,7 +332,9 @@ load_x x15, 13 * portWORD_SIZE( sp )
     load_x x28, 26 * portWORD_SIZE( sp )
     load_x x29, 27 * portWORD_SIZE( sp )
     load_x x30, 28 * portWORD_SIZE( sp )
+#ifndef RTTEST
     load_x x31, 29 * portWORD_SIZE( sp )
+#endif
 #endif /* ifndef __riscv_32e */
 addi sp, sp, portCONTEXT_SIZE
 sret
